@@ -257,3 +257,60 @@ if (qs !== null) { F.qa = true; stageFromScroll = () => { F.stage = +qs; F.x = 2
   if (still) { cap.textContent = "Hover the notch, or hold Option"; shape.classList.add("open"); nstat.textContent = "SPEAKING"; nq.textContent = "“What's on my plate today?”"; na.textContent = "Meeting at ten, report due at five. Start the report now."; return; }
   new IntersectionObserver((es) => { if (es[0].isIntersecting && !running) { running = true; loop(); } }, { threshold: 0.4 }).observe(mac);
 })();
+
+// ---------- boot screen: a calm start-up shown once per visit; click or any key skips
+(() => {
+  const boot = document.getElementById("boot"), root = document.documentElement;
+  if (!boot || !root.classList.contains("booting")) return;
+  const lis = [...boot.querySelectorAll(".boot-log li")], bar = boot.querySelector(".boot-bar i");
+  let finished = false;
+  const finish = () => {
+    if (finished) return; finished = true;
+    try { sessionStorage.setItem("friday-booted", "1"); } catch {}
+    boot.classList.add("done");
+    setTimeout(() => root.classList.remove("booting"), 250);
+  };
+  boot.addEventListener("click", finish);
+  addEventListener("keydown", finish, { once: true });
+  lis.forEach((li, i) => {
+    setTimeout(() => li.classList.add("on"), 700 + i * 520);
+    setTimeout(() => { li.classList.add("ok"); bar.style.width = ((i + 1) / lis.length) * 100 + "%"; }, 1000 + i * 520);
+  });
+  setTimeout(finish, 700 + lis.length * 520 + 650);
+})();
+
+// ---------- custom cursor (mouse only): a dot that follows instantly and a ring that trails, grows on links, labels the play buttons
+(() => {
+  if (!matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+  const root = document.documentElement;
+  const dot = Object.assign(document.createElement("div"), { id: "cur-dot" });
+  const ring = Object.assign(document.createElement("div"), { id: "cur-ring" });
+  dot.setAttribute("aria-hidden", "true"); ring.setAttribute("aria-hidden", "true");
+  document.body.append(ring, dot);
+  root.classList.add("has-cursor");
+  let x = innerWidth / 2, y = innerHeight / 2, rx = x, ry = y;
+  addEventListener("pointermove", (e) => { x = e.clientX; y = e.clientY; });
+  (function tick() {
+    rx += (x - rx) * 0.2; ry += (y - ry) * 0.2;
+    dot.style.transform = `translate(${x}px, ${y}px)`;
+    ring.style.transform = `translate(${rx}px, ${ry}px)`;
+    requestAnimationFrame(tick);
+  })();
+  const LINK = "a, button, summary, label, select, .chip, [role='button']";
+  addEventListener("pointerover", (e) => {
+    const t = e.target.closest ? e.target : e.target.parentElement;
+    const field = t.closest("input, textarea, select");
+    root.classList.toggle("native-cursor", !!field);
+    const link = t.closest(LINK) && !field;
+    const lab = t.closest("[data-say]");
+    ring.classList.toggle("label", !!lab && !t.closest(".chip"));
+    ring.classList.toggle("link", !!link && !(lab && !t.closest(".chip")));
+    ring.textContent = lab && !t.closest(".chip") ? "Play" : "";
+    root.classList.toggle("cur-link", !!link);
+    root.classList.toggle("cur-label", !!lab && !t.closest(".chip"));
+  });
+  addEventListener("pointerdown", () => ring.classList.add("down"));
+  addEventListener("pointerup", () => ring.classList.remove("down"));
+  document.addEventListener("pointerleave", () => root.classList.add("native-cursor"));
+  document.addEventListener("pointerenter", () => root.classList.remove("native-cursor"));
+})();

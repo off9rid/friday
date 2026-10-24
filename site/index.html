@@ -12,10 +12,25 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;600&family=Geist+Mono:wght@400&display=swap" rel="stylesheet">
+  <script>try{if(!sessionStorage.getItem("friday-booted")&&!matchMedia("(prefers-reduced-motion: reduce)").matches){document.documentElement.classList.add("booting");setTimeout(function(){document.documentElement.classList.remove("booting")},7000)}}catch(e){}</script>
   <link rel="stylesheet" href="styles.css">
   <script type="importmap">{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js" } }</script>
 </head>
 <body>
+  <div id="boot" aria-hidden="true">
+    <div class="boot-inner">
+      <img src="logo.svg" width="64" height="64" alt="">
+      <p class="boot-name">fr<span class="ii">ı</span>day</p>
+      <ul class="boot-log">
+        <li>Starting voice</li>
+        <li>Reading your notes</li>
+        <li>Checking your calendar</li>
+        <li>Ready</li>
+      </ul>
+      <div class="boot-bar"><i></i></div>
+      <p class="boot-skip">Click anywhere to skip</p>
+    </div>
+  </div>
   <a class="skip" href="#main">Skip to content</a>
   <canvas id="scene" aria-hidden="true"></canvas>
 

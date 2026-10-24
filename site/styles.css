@@ -264,3 +264,39 @@ body.legal::after { display: none; }
 .short { margin-top: var(--s7); padding: var(--s5) var(--s6); border: 1px solid rgba(255,181,71,.4); border-radius: var(--r3); background: rgba(255,181,71,.06); }
 .short h2 { margin-top: 0; font-size: 28px; }
 body.legal .foot { margin-top: var(--s8); }
+
+/* boot screen: a calm start-up, shown once per visit */
+#boot { display: none; position: fixed; inset: 0; z-index: 100; place-items: center; background: #07060a; transition: opacity .7s var(--ease-out), visibility .7s; }
+html.booting #boot { display: grid; }
+html.booting body { overflow: hidden; }
+#boot.done { opacity: 0; visibility: hidden; }
+.boot-inner { width: min(320px, 80vw); display: grid; justify-items: start; gap: var(--s4); }
+.boot-inner img { opacity: 0; transform: scale(.9); animation: bootin .7s .1s var(--ease-out) forwards; }
+.boot-name { font: 400 56px/1 var(--font-display); letter-spacing: -.01em; opacity: 0; animation: bootin .7s .25s var(--ease-out) forwards; }
+.boot-log { list-style: none; margin: var(--s2) 0 0; padding: 0; display: grid; gap: var(--s2); font: 400 13px/1 var(--font-mono); letter-spacing: .08em; color: var(--muted); }
+.boot-log li { opacity: 0; transform: translateY(4px); transition: opacity .35s, transform .35s var(--ease-out), color .3s; display: flex; align-items: center; gap: var(--s3); }
+.boot-log li::before { content: ""; width: 6px; height: 6px; border-radius: 50%; border: 1px solid var(--muted); transition: background .3s, border-color .3s; }
+.boot-log li.on { opacity: 1; transform: none; }
+.boot-log li.ok { color: var(--ink); } .boot-log li.ok::before { background: var(--accent); border-color: var(--accent); }
+.boot-bar { width: 100%; height: 2px; background: var(--line); overflow: hidden; border-radius: 2px; }
+.boot-bar i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .5s var(--ease-out); }
+.boot-skip { font: 400 11px/1 var(--font-mono); letter-spacing: .14em; text-transform: uppercase; color: #5f584c; opacity: 0; animation: bootin .6s 1.2s forwards; }
+@keyframes bootin { to { opacity: 1; transform: none; } }
+
+/* custom cursor, only for mouse users (JS adds .has-cursor) */
+html.has-cursor, html.has-cursor * { cursor: none !important; }
+html.has-cursor.native-cursor, html.has-cursor.native-cursor * { cursor: auto !important; }
+html.has-cursor.native-cursor input[type="text"], html.has-cursor.native-cursor input[type="email"] { cursor: text !important; }
+#cur-dot, #cur-ring { position: fixed; left: 0; top: 0; z-index: 200; pointer-events: none; border-radius: 50%; opacity: 0; transition: opacity .2s; }
+html.has-cursor #cur-dot, html.has-cursor #cur-ring { opacity: 1; }
+html.native-cursor #cur-dot, html.native-cursor #cur-ring { opacity: 0; }
+#cur-dot { width: 8px; height: 8px; margin: -4px 0 0 -4px; background: var(--accent); transition: width .2s var(--ease-out), height .2s var(--ease-out), margin .2s var(--ease-out), opacity .2s; }
+#cur-ring { width: 38px; height: 38px; margin: -19px 0 0 -19px; border: 1px solid rgba(255,181,71,.55); display: grid; place-items: center; font: 400 10px/1 var(--font-mono); letter-spacing: .14em; text-transform: uppercase; color: var(--accent-ink);
+  transition: width .3s var(--ease-out), height .3s var(--ease-out), margin .3s var(--ease-out), background .3s, border-color .3s, opacity .2s; }
+#cur-ring.link { width: 62px; height: 62px; margin: -31px 0 0 -31px; background: rgba(255,181,71,.14); border-color: var(--accent); }
+#cur-ring.label { width: 84px; height: 84px; margin: -42px 0 0 -42px; background: var(--accent); border-color: var(--accent); }
+#cur-ring.down { width: 28px; height: 28px; margin: -14px 0 0 -14px; }
+#cur-ring.link.down { width: 50px; height: 50px; margin: -25px 0 0 -25px; }
+html.cur-link #cur-dot, html.cur-label #cur-dot { width: 4px; height: 4px; margin: -2px 0 0 -2px; }
+html.cur-label #cur-dot { opacity: 0; }
+@media (pointer: coarse) { #cur-dot, #cur-ring { display: none; } }
