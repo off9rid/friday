@@ -347,6 +347,7 @@ document.getElementById("brief-skip")?.addEventListener("click", () => step(4));
     boot.classList.add("done");
     setTimeout(() => root.classList.remove("booting"), 250);
   };
+  if (matchMedia("(pointer: coarse)").matches) boot.querySelector(".boot-skip").textContent = "Tap anywhere to skip";
   boot.addEventListener("click", finish);
   addEventListener("keydown", finish, { once: true });
   lis.forEach((li, i) => {
