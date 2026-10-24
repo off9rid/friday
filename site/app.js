@@ -170,6 +170,14 @@ form?.addEventListener("submit", async (e) => {
   const okEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   form.name.setAttribute("aria-invalid", String(!name));
   form.email.setAttribute("aria-invalid", String(!okEmail));
+  const agreed = form.agree.checked;
+  form.agree.setAttribute("aria-invalid", String(!agreed));
+  if (name && okEmail && !agreed) {
+    msg.className = "msg err";
+    msg.textContent = "Please read and agree to the Terms and Privacy Policy to continue.";
+    form.agree.focus();
+    return;
+  }
   if (!name || !okEmail) {
     msg.className = "msg err";
     msg.textContent = !name ? "Please add your name." : "That email doesn't look right.";
@@ -179,7 +187,7 @@ form?.addEventListener("submit", async (e) => {
   const btn = form.querySelector("button");
   btn.disabled = true;
   btn.textContent = "Sending…";
-  const payload = { name, email, plan: form.plan.value };
+  const payload = { name, email, plan: form.plan.value, agreedToTermsAndPrivacy: true, agreedAt: new Date().toISOString() };
   try {
     if (FORM_ENDPOINT) {
       const r = await fetch(FORM_ENDPOINT, { method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json" }, body: JSON.stringify(payload) });

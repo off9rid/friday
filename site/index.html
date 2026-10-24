@@ -250,7 +250,7 @@
     <section class="section privacy" data-stage="4" data-x="0" data-dim="0.25">
       <div class="privacy-card tilt">
         <h2>Your notes stay on your Mac.</h2>
-        <p>Friday lives on your own computer. Your vault isn't uploaded to or stored on our servers. Only the question you ask is sent to the AI model to get an answer.</p>
+        <p>Friday lives on your own computer and only listens when you hold the key. Your vault isn't stored on our servers. Only your question, and the few notes needed to answer it, go to the AI model. <a href="privacy.html">Read exactly how it works.</a></p>
       </div>
     </section>
 
@@ -301,6 +301,10 @@
             <option>Not sure yet</option>
           </select>
         </div>
+        <div class="consent">
+          <input id="agree" name="agree" type="checkbox" required>
+          <label for="agree">I have read and agree to the <a href="terms.html" target="_blank" rel="noopener">Terms of Use</a> and <a href="privacy.html" target="_blank" rel="noopener">Privacy Policy</a>.</label>
+        </div>
         <button class="btn" type="submit">Request access</button>
         <p class="msg" id="form-msg" role="status" aria-live="polite"></p>
       </form>
@@ -309,7 +313,7 @@
 
   <footer class="foot">
     <span>Friday · Made in Ontario</span>
-    <a href="#top">Back to top</a>
+    <span class="foot-links"><a href="privacy.html">Privacy Policy</a><a href="terms.html">Terms</a><a href="#top">Back to top</a></span>
   </footer>
 
   <script src="app.js" defer></script>
