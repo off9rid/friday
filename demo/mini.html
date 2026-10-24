@@ -1,0 +1,266 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Friday</title>
+<style>
+  :root { --c: #ffb547; --c2: #ff7a3d; --dim: #8a7a66; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: transparent; overflow: hidden; height: 100%; font: 13px/1.45 -apple-system, "SF Pro Text", sans-serif; color: #f7efe2; -webkit-user-select: none; cursor: default; }
+  #wrap { position: absolute; top: 0; left: 0; right: 0; }
+  #shell { position: relative; background: #000; border-radius: 0 0 28px 28px; padding: 38px 18px 14px; display: flex; flex-direction: column; gap: 10px; overflow: hidden; }
+  #shell::before { content: ""; position: absolute; inset: -60%; z-index: 0;
+    background: conic-gradient(from 0deg, transparent 0 55%, var(--c) 75%, var(--c2) 88%, transparent 100%);
+    animation: spin 5s linear infinite; opacity: .6; transition: opacity .3s; }
+  body.speaking #shell::before, body.hearing #shell::before { animation-duration: 1.6s; opacity: .95; }
+  #shell::after { content: ""; position: absolute; inset: 1.5px; z-index: 0; border-radius: 0 0 27px 27px;
+    background: radial-gradient(120% 80% at 50% 0%, color-mix(in srgb, var(--c) 14%, #0c0703) 0%, #080503 55%, #000 100%); }
+  #shell > * { position: relative; z-index: 1; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  #scan { position: absolute !important; inset: 0; z-index: 3 !important; pointer-events: none; opacity: .05;
+    background: repeating-linear-gradient(0deg, #fff 0 1px, transparent 1px 3px); }
+  #sweep { position: absolute !important; left: 0; right: 0; height: 60px; z-index: 3 !important; pointer-events: none; top: -60px;
+    background: linear-gradient(transparent, color-mix(in srgb, var(--c) 10%, transparent), transparent); animation: sweep 6s linear infinite; }
+  @keyframes sweep { to { top: 110%; } }
+
+  #top { display: flex; align-items: center; gap: 12px; }
+  #orb { width: 58px; height: 58px; flex: none; margin: -6px -4px -6px -6px; }
+  #label { font: 700 11px -apple-system; letter-spacing: .3em; text-transform: uppercase; color: var(--c); text-shadow: 0 0 10px var(--c); }
+  #sub { font-size: 10px; letter-spacing: .12em; color: var(--dim); text-transform: uppercase; margin-top: 2px; white-space: nowrap; }
+  #right { margin-left: auto; text-align: right; }
+  #clock { font: 200 26px/1 -apple-system; font-variant-numeric: tabular-nums; color: #fbf4e8; }
+  #clock b { font-weight: 200; color: var(--c); animation: blink 1s steps(2) infinite; }
+  #date { font-size: 9.5px; letter-spacing: .2em; color: var(--dim); text-transform: uppercase; margin-top: 3px; }
+  #bars { display: none; gap: 3px; align-items: center; height: 30px; }
+  #bars i { width: 3px; height: 4px; border-radius: 2px; background: linear-gradient(var(--c), var(--c2)); box-shadow: 0 0 6px var(--c); }
+  body.talk #bars { display: flex; } body.talk #clockbox { display: none; }
+
+  #dash { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+  body.talk #dash, body.talk #chips { display: none; }
+  .tile { position: relative; background: linear-gradient(160deg, rgba(255,181,71,.07), rgba(255,122,61,.03)); border: 1px solid rgba(255,181,71,.14);
+    border-radius: 14px; padding: 9px 11px 8px; overflow: hidden; animation: rise .45s cubic-bezier(.2,.9,.25,1.05) both; }
+  .tile:nth-child(2) { animation-delay: .05s; } .tile:nth-child(3) { animation-delay: .1s; } .tile:nth-child(4) { animation-delay: .15s; } .tile:nth-child(5) { animation-delay: .2s; } .tile:nth-child(6) { animation-delay: .25s; }
+  @keyframes rise { from { opacity: 0; transform: translateY(-8px) scale(.97); } to { opacity: 1; transform: none; } }
+  .k { font: 600 8.5px -apple-system; letter-spacing: .24em; color: var(--dim); text-transform: uppercase; white-space: nowrap; }
+  .v { font: 300 19px/1.15 -apple-system; color: #fbf4e8; margin-top: 3px; font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .s { font-size: 10px; color: #a8998a; margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .bar { height: 3px; border-radius: 2px; background: rgba(255,255,255,.07); margin-top: 7px; overflow: hidden; }
+  .bar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--c), var(--c2)); box-shadow: 0 0 8px var(--c); transition: width .8s; }
+  .tile.flash { animation: flash 1.6s ease-out 3.6s both; }
+  @keyframes flash { 0% { box-shadow: 0 0 0 0 rgba(255,181,71,.9); border-color: #ffb547; } 100% { box-shadow: 0 0 0 14px rgba(255,181,71,0); } }
+  .warn .v { color: #ffc65e; } .warn .bar i { background: #ffc65e; box-shadow: 0 0 8px #ffc65e; }
+  #tNon { grid-column: span 2; display: flex; align-items: center; gap: 12px; }
+  #ring { width: 46px; height: 46px; flex: none; }
+  #dots { display: flex; flex-wrap: wrap; gap: 4px 5px; margin-top: 5px; }
+  #dots span { font: 600 8.5px -apple-system; letter-spacing: .1em; padding: 3px 6px; border-radius: 6px; color: #8a7a66; border: 1px solid rgba(255,181,71,.12); text-transform: uppercase; }
+  #dots span.on { color: #1a1206; background: linear-gradient(var(--c), var(--c2)); border-color: transparent; box-shadow: 0 0 8px rgba(255,181,71,.5); }
+  #dots span.half { color: #ffc65e; border-color: rgba(255,198,94,.45); }
+  #tMusic { grid-column: span 3; display: none; align-items: center; gap: 10px; padding: 7px 9px; }
+  #tMusic.show { display: flex; }
+  #art { width: 34px; height: 34px; border-radius: 8px; background: #2a1a0a center/cover; flex: none; box-shadow: 0 0 12px rgba(255,181,71,.25); }
+  #tMusic.playing #art { animation: beat 1.2s ease-in-out infinite; }
+  @keyframes beat { 50% { box-shadow: 0 0 20px rgba(255,181,71,.6); } }
+  #mtxt { min-width: 0; flex: 1; } #mtxt .v { font-size: 13px; font-weight: 500; margin: 0; }
+  .ib { background: none; border: 1px solid rgba(255,181,71,.2); color: var(--c); width: 28px; height: 28px; border-radius: 50%; cursor: pointer; font-size: 10px; flex: none; transition: all .15s; }
+  .ib:hover { background: rgba(255,181,71,.12); box-shadow: 0 0 10px rgba(255,181,71,.3); }
+
+  #chips { display: flex; gap: 6px; }
+  .chip { flex: 1; background: rgba(255,181,71,.05); border: 1px solid rgba(255,181,71,.16); color: #e9cfa6; border-radius: 10px; height: 26px;
+    font: 600 8.5px -apple-system; letter-spacing: .14em; text-transform: uppercase; cursor: pointer; transition: all .15s; white-space: nowrap; }
+  .chip:hover { color: var(--c); border-color: var(--c); box-shadow: 0 0 12px rgba(255,181,71,.25); }
+  .chip.fired { background: linear-gradient(var(--c), var(--c2)); color: #1a1206; }
+
+  #convo { display: none; flex-direction: column; gap: 6px; }
+  body.talk #convo { display: flex; }
+  #you { color: #a8998a; font-size: 12px; font-style: italic; }
+  #you:empty { display: none; }
+  #ai { color: #fbf4e8; font-size: 13.5px; max-height: 250px; overflow-y: auto; white-space: pre-wrap; word-wrap: break-word; padding-right: 4px; -webkit-user-select: text; }
+  #ai::-webkit-scrollbar { width: 4px; } #ai::-webkit-scrollbar-thumb { background: #4a3418; border-radius: 2px; }
+  #ai.live::after { content: "▍"; color: var(--c); animation: blink 1s steps(2) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  #row { display: flex; gap: 8px; }
+  #ask { flex: 1; min-width: 0; background: rgba(255,255,255,.04); border: 1px solid rgba(255,181,71,.16); border-radius: 13px; height: 36px; padding: 0 13px;
+    color: #fbf4e8; font: 13px -apple-system; outline: none; transition: all .15s; -webkit-user-select: text; }
+  #ask::placeholder { color: #6b5a48; }
+  #ask:focus { border-color: var(--c); box-shadow: 0 0 14px rgba(255,181,71,.2); }
+  #hold { width: 92px; border: 1px solid #5a3a14; background: linear-gradient(#2a1a0a, #140c05); color: var(--c); border-radius: 13px; height: 36px;
+    font: 700 10px -apple-system; letter-spacing: .2em; cursor: pointer; transition: all .15s; }
+  #hold:hover { box-shadow: 0 0 14px rgba(255,181,71,.25); }
+  #hold.on { background: linear-gradient(var(--c), var(--c2)); color: #1a1206; transform: scale(.97); box-shadow: 0 0 22px var(--c); border-color: transparent; }
+
+  body.hearing { --c: #ff6b5e; --c2: #ffb547; } body.thinking, body.transcribing { --c: #ffe08a; --c2: #ffb547; } body.error { --c: #ff4a4a; --c2: #ff4a4a; }
+  body.speaking { --c: #ffc56b; --c2: #ff7a3d; }
+</style></head>
+<body class="idle">
+<div id="wrap"><div id="shell">
+  <div id="scan"></div><div id="sweep"></div>
+  <div id="top">
+    <canvas id="orb" width="116" height="116"></canvas>
+    <div><div id="label">Friday</div><div id="sub">Ready · hold ⌥ to talk</div></div>
+    <div id="right"><div id="clockbox"><div id="clock">--<b>:</b>--</div><div id="date"></div></div><div id="bars"></div></div>
+  </div>
+
+  <div id="dash">
+    <div class="tile" id="tNext"><div class="k">Next up</div><div class="v" id="nTime">--</div><div class="s" id="nName"></div><div class="bar"><i id="nBar"></i></div></div>
+    <div class="tile" id="tWx"><div class="k">Toronto</div><div class="v" id="wTemp">--</div><div class="s" id="wDesc"></div></div>
+    <div class="tile" id="tDl"><div class="k">Next deadline</div><div class="v" id="dDays">--</div><div class="s" id="dName"></div></div>
+    <div class="tile" id="tNon"><canvas id="ring" width="92" height="92"></canvas><div style="min-width:0"><div class="k" id="nK">Today</div><div id="dots"></div></div></div>
+    <div class="tile" id="tProto"><div class="k">Mode</div><div class="v" id="prName">Work</div><div class="s" id="prSub">notifications on</div></div>
+  </div>
+  <div id="chips">
+    <button class="chip">Brief me</button><button class="chip">Inbox</button><button class="chip">Focus</button><button class="chip">Wind down</button>
+  </div>
+
+  <div id="convo"><div id="you"></div><div id="ai"></div></div>
+
+  <div id="row"><input id="ask" placeholder="Ask Friday anything…" autocomplete="off" spellcheck="false"><button id="hold">HOLD</button></div>
+</div></div>
+<script>
+const $ = (id) => document.getElementById(id);
+const N = 18; for (let i = 0; i < N; i++) $('bars').appendChild(document.createElement('i'));
+const bars = [...$('bars').children];
+let level = 0, voice = null, ai = '', held = false, st = 'idle', today = null, talkUntil = 0;
+const LABEL = { idle: 'Friday', listening: 'Standing by', muted: 'Standing by', hearing: 'Listening', transcribing: 'Transcribing', thinking: 'Thinking', speaking: 'Speaking', error: 'Fault' };
+const BUSY = ['hearing', 'transcribing', 'thinking', 'speaking'];
+
+function setState(s) {
+  st = s;
+  document.body.classList.remove(...Object.keys(LABEL)); document.body.classList.add(s);
+  $('label').textContent = LABEL[s] || s;
+  $('ai').classList.toggle('live', s === 'thinking' || s === 'speaking');
+  if (BUSY.includes(s)) showTalk(); else talkUntil = Date.now() + 4000;   // the answer lingers, then the dashboard returns
+  tell();
+}
+function showTalk() { talkUntil = Infinity; document.body.classList.add('talk'); }
+function tell() {   // tell the Swift panel how tall to be and what state we're in
+  const h = Math.ceil($('shell').getBoundingClientRect().height);
+  if (window.webkit && webkit.messageHandlers.cortex) webkit.messageHandlers.cortex.postMessage({ state: st, h });
+}
+new ResizeObserver(tell).observe($('shell'));
+function setAi(t) { $('ai').textContent = t; $('ai').scrollTop = $('ai').scrollHeight; }
+const post = (u, b) => (u === '/api/ask' ? fetch(u, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(b || {}) }).catch(() => {}) : null);
+
+function ptt(on) { if (held === on) return; held = on; $('hold').classList.toggle('on', on); post('/api/ptt', { down: on }); }
+$('hold').addEventListener('pointerdown', (e) => { e.preventDefault(); $('hold').setPointerCapture(e.pointerId); ptt(true); });
+$('hold').addEventListener('pointerup', () => ptt(false));
+$('hold').addEventListener('pointercancel', () => ptt(false));
+addEventListener('keydown', (e) => {
+  if (document.activeElement === $('ask')) {
+    if (e.key === 'Enter' && $('ask').value.trim()) {
+      const t = $('ask').value.trim(); $('ask').value = ''; $('ask').blur();
+      showTalk(); $('you').textContent = '“' + t + '”'; ai = ''; setAi(''); post('/api/ask', { text: t });
+    }
+    if (e.key === 'Escape') $('ask').blur();
+    return;
+  }
+  if (e.code === 'Space' && !e.repeat) { e.preventDefault(); ptt(true); }
+  if (e.key === 'Escape') post('/api/stop');
+  if (e.key === '/' || e.key === 'Enter') { e.preventDefault(); $('ask').focus(); }
+});
+addEventListener('keyup', (e) => { if (e.code === 'Space' && document.activeElement !== $('ask')) ptt(false); });
+window.nativePtt = (on) => { held = on; $('hold').classList.toggle('on', on); };   // the Swift app's global hotkey
+document.querySelectorAll('.chip').forEach((b) => b.addEventListener('click', () => {
+  b.classList.add('fired'); setTimeout(() => b.classList.remove('fired'), 900); post('/api/action', { act: b.dataset.act });
+}));
+$('convo').addEventListener('click', () => { talkUntil = Date.now() + 30000; });   // reading it: keep it up
+
+// ---------- dashboard ----------
+const cap = (s) => s ? s[0].toUpperCase() + s.slice(1) : '';
+const hm = (t) => new Date(t).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+function dur(ms) { const m = Math.max(0, Math.round(ms / 60000)); return m >= 60 ? `${Math.floor(m / 60)}h ${m % 60}m` : `${m}m`; }
+let nonFrac = 0, nonShown = 0, simOff = 0;
+const sim = () => Date.now() + simOff;
+function renderToday() {
+  const t = today; if (!t) return;
+  const now = sim(), cal = t.cal || [];
+  const i = cal.findIndex((c) => c.at > now), next = cal[i], prev = cal[i - 1] || { at: now - 2 * 3600e3 };
+  if (next) {
+    $('nTime').textContent = hm(next.at).replace(' ', '\u2009');
+    $('nName').textContent = next.label.replace(/ \(.*\)| about .*/, '');
+    $('nBar').style.width = Math.min(100, (now - prev.at) / (next.at - prev.at) * 100) + '%';
+    $('tNext').classList.toggle('warn', next.at - now < 20 * 60e3);
+  } else { $('nTime').textContent = 'Clear'; $('nName').textContent = 'nothing else today'; }
+  if (t.weather) { $('wTemp').textContent = t.weather.temp + '°'; $('wDesc').textContent = cap(t.weather.desc) + ' · H ' + t.weather.high + '°'; }
+  const d = (t.deadlines || [])[0];
+  if (d && $('dName').textContent && $('dName').textContent !== d.label) { $('tDl').classList.remove('flash'); void $('tDl').offsetWidth; $('tDl').classList.add('flash'); }
+  if (d) { $('dDays').textContent = d.days === 0 ? (d.time ? hm(new Date(sim()).setHours(...d.time.split(':').map(Number), 0, 0)) : 'Today') : d.days === 1 ? 'Tomorrow' : d.days + ' days'; $('dName').textContent = d.label; $('tDl').classList.toggle('warn', d.days <= 1); }
+  const nn = t.tasks || [];
+  if (nn.length) {
+    let done = 0;
+    $('dots').innerHTML = nn.map((x) => { if (x.done) done++; return `<span class="${x.done ? 'on' : ''}">${x.name}</span>`; }).join('');
+    $('nK').textContent = `Today · ${done}/${nn.length} done`;
+    nonFrac = done / nn.length;
+  }
+}
+function tickClock() {
+  const n = new Date(sim());
+  $('clock').innerHTML = n.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }).replace(/\s?[AP]M/i, '').replace(':', '<b>:</b>');
+  $('date').textContent = n.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+  if (talkUntil !== Infinity && Date.now() > talkUntil && document.body.classList.contains('talk')) { document.body.classList.remove('talk'); tell(); }
+  renderToday();
+}
+setInterval(tickClock, 1000); tickClock();
+
+// ---------- events ----------
+const es = new EventSource('/events');
+es.onmessage = (ev) => {
+  const m = JSON.parse(ev.data);
+  switch (m.type) {
+    case 'hello': if (m.state !== 'boot') setState(m.state); break;
+    case 'state': setState(m.state); break;
+    case 'today': today = m.today; if (m.today.now) simOff = m.today.now - Date.now(); renderToday(); break;
+    case 'lvl': level = m.b ? 0 : m.v; break;
+    case 'ptt': window.nativePtt(m.on); if (m.on) { showTalk(); $('you').textContent = ''; } break;
+    case 'transcribing': setState('transcribing'); break;
+    case 'you': showTalk(); $('you').textContent = '“' + m.text + '”'; ai = ''; setAi(''); break;
+    case 'delta': ai += m.text; setAi(ai.replace(/[*#`_>|]+/g, '')); break;
+    case 'speak': voice = { env: m.env, start: performance.now() }; if (!ai) { ai = m.text; setAi(ai); } break;
+    case 'hearing': showTalk(); $('you').textContent = '“' + m.text + ' …”'; break;
+    case 'live': showTalk(); if (m.all) { setAi('✓ ' + m.text); talkUntil = Date.now() + 9000; } else { ai = (ai ? ai + '  ·  ' : '') + '✓ ' + m.text; setAi(ai); } break;
+    case 'error': setState('error'); showTalk(); setAi(m.text); talkUntil = Date.now() + 9000; break;
+  }
+};
+
+// ---------- the orb: a 3D particle sphere that breathes with the voice ----------
+const oc = $('orb').getContext('2d'), rc = $('ring').getContext('2d');
+const P = [], NP = 220;
+for (let i = 0; i < NP; i++) { const y = 1 - (i / (NP - 1)) * 2, r = Math.sqrt(1 - y * y), th = i * 2.39996; P.push([Math.cos(th) * r, y, Math.sin(th) * r]); }
+let rot = 0, sm = 0, last = 0, cC = '#ffb547', cC2 = '#ff7a3d', cAt = -1e9;
+function frame(now) {
+  requestAnimationFrame(frame);
+  const live = BUSY.includes(st) || held;
+  if (!live && now - last < 50) return;   // ~20 fps idle, full rate while live
+  last = now;
+  if (now - cAt > 250) { const cs = getComputedStyle(document.body); cC = cs.getPropertyValue('--c').trim() || '#ffb547'; cC2 = cs.getPropertyValue('--c2').trim() || '#ff7a3d'; cAt = now; }
+  let v = 0;
+  if (voice) { const i = Math.floor((now - voice.start) / 33 * 1.18); if (voice.env && i < voice.env.length) v = voice.env[i]; else voice = null; }
+  v = Math.max(v || 0, held ? level : 0);
+  sm += (v - sm) * 0.35;
+  rot += st === 'thinking' || st === 'transcribing' ? 0.06 : 0.012 + sm * 0.05;
+  const R = 30 + sm * 12 + (st === 'thinking' ? Math.sin(now / 160) * 3 : 0);
+  oc.clearRect(0, 0, 116, 116);
+  const g = oc.createRadialGradient(58, 58, 2, 58, 58, R * 1.5);
+  g.addColorStop(0, cC + '55'); g.addColorStop(1, 'transparent');
+  oc.fillStyle = g; oc.fillRect(0, 0, 116, 116);
+  const cr = Math.cos(rot), sr = Math.sin(rot), ct = Math.cos(0.4), stt = Math.sin(0.4);
+  for (let i = 0; i < NP; i++) {
+    const wob = 1 + sm * 0.35 * Math.sin(i * 1.7 + now / 90);
+    const x = P[i][0] * wob, y = P[i][1] * wob, z = P[i][2] * wob;
+    const x1 = x * cr - z * sr, z1 = x * sr + z * cr;
+    const y1 = y * ct - z1 * stt, z2 = y * stt + z1 * ct;
+    const s = 1.3 / (1.9 - z2 * 0.6);
+    oc.globalAlpha = 0.25 + (z2 + 1) * 0.38; oc.fillStyle = i % 3 ? cC : cC2;
+    oc.beginPath(); oc.arc(58 + x1 * R * s, 58 + y1 * R * s, 0.7 + (z2 + 1) * 0.75, 0, 7); oc.fill();
+  }
+  oc.globalAlpha = 1;
+  if (document.body.classList.contains('talk')) { const t = now / 120; bars.forEach((b, i) => { b.style.height = (4 + sm * 26 * (0.55 + 0.45 * Math.sin(t + i * 0.9))) + 'px'; }); }
+  nonShown += (nonFrac - nonShown) * 0.08;
+  rc.clearRect(0, 0, 92, 92); rc.lineWidth = 7; rc.lineCap = 'round';
+  rc.strokeStyle = 'rgba(255,255,255,.07)'; rc.beginPath(); rc.arc(46, 46, 38, 0, 7); rc.stroke();
+  const gr = rc.createLinearGradient(0, 0, 92, 92); gr.addColorStop(0, cC); gr.addColorStop(1, cC2);
+  rc.strokeStyle = gr; rc.shadowColor = cC; rc.shadowBlur = 10;
+  rc.beginPath(); rc.arc(46, 46, 38, -Math.PI / 2, -Math.PI / 2 + Math.max(0.001, nonShown) * Math.PI * 2); rc.stroke(); rc.shadowBlur = 0;
+  rc.fillStyle = '#fbf4e8'; rc.font = '300 22px -apple-system'; rc.textAlign = 'center'; rc.textBaseline = 'middle';
+  rc.fillText(Math.round(nonShown * 100) + '%', 46, 47);
+}
+requestAnimationFrame(frame); tell();
+</script>
+</body></html>

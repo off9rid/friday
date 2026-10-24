@@ -7,7 +7,8 @@
   <meta name="description" content="Friday is a personal AI assistant that lives on your Mac, knows your notes, and answers out loud. Hear her, then get yours set up in one call.">
   <meta name="theme-color" content="#07060a">
   <meta property="og:title" content="Friday · Your own AI assistant">
-  <meta property="og:image" content="og.png">
+  <meta property="og:image" content="https://meetfriday.vercel.app/og.png">
+  <meta property="og:url" content="https://meetfriday.vercel.app/">
   <meta name="twitter:card" content="summary_large_image">
   <meta property="og:description" content="A Jarvis-style assistant that knows your notes, runs your Mac, and talks back. Set up for you.">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
@@ -40,6 +41,7 @@
     <a class="brand" href="#top" aria-label="Friday home"><span class="wm">fr<span class="ii">ı</span>day</span></a>
     <nav aria-label="Main">
       <a href="#voice">What it does</a>
+      <a href="#watch">Watch</a>
       <a href="#demo">Hear her</a>
       <a href="#how">How it works</a>
       <a href="#pricing">Pricing</a>
@@ -132,6 +134,28 @@
       <p class="notch-cap" id="ncap" aria-live="off">Move to the notch</p>
     </section>
 
+    <section class="watch" id="watch" data-stage="3.2" data-x="0" data-dim="0.6">
+      <div class="notch-head">
+        <p class="kicker">Real screen recording</p>
+        <h2>Watch her <em>work.</em></h2>
+        <p class="section-lede" id="film-lede">Apps open while you're still talking. Then she answers from your own notes, out loud.</p>
+      </div>
+      <div class="film-tabs" role="tablist" aria-label="Demo clips">
+        <button class="chip" type="button" role="tab" aria-selected="true" data-clip="apps" data-lede="Apps open while you're still talking. Then she answers from your own notes, out loud.">Opens apps mid-sentence</button>
+        <button class="chip" type="button" role="tab" aria-selected="false" data-clip="briefing" data-lede="Ask about your day and get the short version: what's next, what's due, what to do first.">Morning briefing</button>
+        <button class="chip" type="button" role="tab" aria-selected="false" data-clip="memory" data-lede="She reads your client notes and tells you exactly what you promised, and to whom.">Remembers promises</button>
+        <button class="chip" type="button" role="tab" aria-selected="false" data-clip="deadlines" data-lede="Mention a deadline once. She logs it, and your dashboard updates while you watch.">Catches deadlines</button>
+      </div>
+      <figure class="film">
+        <video id="film" src="video/friday-apps.mp4" poster="video/friday-apps.jpg" muted playsinline loop preload="metadata" aria-label="Screen recording of Friday on a Mac"></video>
+        <button class="film-sound" id="film-sound" type="button" aria-pressed="false">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9z"/><path class="wave" d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <span>Sound on</span>
+        </button>
+      </figure>
+      <p class="film-cap">Recorded on a MacBook with a demo account and sample notes. The user's voice is generated; thinking pauses are shortened by up to two seconds.</p>
+    </section>
+
     <section class="uses" id="uses" data-stage="3.5" data-x="0" data-dim="0.4">
       <p class="kicker">Built around you</p>
       <h2>Whatever your day looks like, <em>she adapts.</em></h2>
@@ -217,7 +241,7 @@
 
     <section class="section" id="pricing" data-stage="4" data-x="0" data-dim="0.25">
       <h2>Simple pricing.</h2>
-      <p class="section-lede">One setup fee, then a monthly plan. Cancel anytime. Every plan starts with a free 15-minute demo.</p>
+      <p class="section-lede">One setup fee, then a monthly plan. Cancel anytime. Every plan starts with a free 30-minute demo.</p>
       <p class="founding center-f"><b>Founding offer</b> · 5 spots at half-price setup, then prices go up.</p>
       <div class="plans">
         <article class="plan tilt">
@@ -302,7 +326,7 @@
         </details>
         <details>
           <summary>What happens on the free demo?</summary>
-          <p>Fifteen minutes on a video call. You watch Friday answer questions and run a Mac live, we talk about your day, and you get an honest answer on whether Friday is worth it for you.</p>
+          <p>Thirty minutes on a video call. You watch Friday answer questions and run a Mac live, we talk about your day, and you get an honest answer on whether Friday is worth it for you.</p>
         </details>
         <details>
           <summary>How long does setup take?</summary>
@@ -317,7 +341,13 @@
 
     <section class="section join" id="join" data-stage="5" data-x="0" data-dim="0.6">
       <h2>See her run <em>live.</em></h2>
-      <p class="section-lede">Book a free 15-minute demo. We'll show you Friday working on a real Mac and map out what yours would handle. No commitment.</p>
+      <p class="section-lede">A free 30-minute demo on a video call. Three quick steps, about two minutes, no commitment.</p>
+      <ol class="stepbar" aria-label="Booking steps">
+        <li class="on" data-step="1"><span>1</span>Your details</li>
+        <li data-step="2"><span>2</span>Pick a time</li>
+        <li data-step="3"><span>3</span>Make it yours</li>
+      </ol>
+
       <form id="join-form" novalidate>
         <div class="field">
           <label for="name">Name</label>
@@ -336,18 +366,125 @@
             <option>Not sure yet</option>
           </select>
         </div>
+        <input class="hp" name="website" type="text" tabindex="-1" autocomplete="off" aria-hidden="true">
         <div class="consent">
           <input id="agree" name="agree" type="checkbox" required>
           <label for="agree">I have read and agree to the <a href="terms.html" target="_blank" rel="noopener">Terms of Use</a> and <a href="privacy.html" target="_blank" rel="noopener">Privacy Policy</a>.</label>
         </div>
-        <button class="btn" type="submit">Book my free demo</button>
+        <button class="btn" type="submit">Pick a time</button>
         <p class="msg" id="form-msg" role="status" aria-live="polite"></p>
       </form>
+
+      <div class="cal-step" id="cal-step" hidden>
+        <div class="cal-embed" id="cal-embed"><p class="cal-loading">Loading the calendar…</p></div>
+        <button class="linkish" type="button" id="cal-back">Change my details</button>
+      </div>
+
+      <form class="brief" id="brief-form" hidden novalidate>
+        <div class="brief-head">
+          <p class="eyebrow"><span class="dot" aria-hidden="true"></span>You're booked</p>
+          <h3>Make the demo about you.</h3>
+          <p>Optional, about a minute. We'll set Friday up around your answers before the call, so you see her handle your day, not a sample one.</p>
+        </div>
+        <fieldset>
+          <legend>What best describes you?</legend>
+          <div class="opts">
+            <label class="opt"><input type="radio" name="role" value="Student"><span>Student</span></label>
+            <label class="opt"><input type="radio" name="role" value="Professional"><span>Professional</span></label>
+            <label class="opt"><input type="radio" name="role" value="Business owner"><span>Business owner</span></label>
+            <label class="opt"><input type="radio" name="role" value="Creator"><span>Creator</span></label>
+            <label class="opt"><input type="radio" name="role" value="Team lead"><span>Team lead</span></label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>What do you drop or waste time on? <small>Pick any</small></legend>
+          <div class="opts">
+            <label class="opt"><input type="checkbox" name="pains" value="Missing deadlines"><span>Missing deadlines</span></label>
+            <label class="opt"><input type="checkbox" name="pains" value="Email and messages"><span>Email and messages</span></label>
+            <label class="opt"><input type="checkbox" name="pains" value="Prepping for meetings"><span>Prepping for meetings</span></label>
+            <label class="opt"><input type="checkbox" name="pains" value="Notes all over the place"><span>Notes all over the place</span></label>
+            <label class="opt"><input type="checkbox" name="pains" value="Staying off my phone"><span>Staying off my phone</span></label>
+            <label class="opt"><input type="checkbox" name="pains" value="Planning my week"><span>Planning my week</span></label>
+            <label class="opt"><input type="checkbox" name="pains" value="Answering the same questions"><span>Answering the same questions</span></label>
+          </div>
+        </fieldset>
+        <div class="field">
+          <label for="onething">If Friday took one thing off your plate tomorrow, what would it be?</label>
+          <textarea id="onething" name="onething" rows="3" placeholder="e.g. Remind me what I promised clients and draft the follow-ups"></textarea>
+        </div>
+        <fieldset>
+          <legend>Where do your notes and to-dos live now? <small>Pick any</small></legend>
+          <div class="opts">
+            <label class="opt"><input type="checkbox" name="notes" value="Obsidian"><span>Obsidian</span></label>
+            <label class="opt"><input type="checkbox" name="notes" value="Notion"><span>Notion</span></label>
+            <label class="opt"><input type="checkbox" name="notes" value="Apple Notes"><span>Apple Notes</span></label>
+            <label class="opt"><input type="checkbox" name="notes" value="Google Docs"><span>Google Docs</span></label>
+            <label class="opt"><input type="checkbox" name="notes" value="Paper"><span>Paper</span></label>
+            <label class="opt"><input type="checkbox" name="notes" value="Nowhere, really"><span>Nowhere, really</span></label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Which calendar and email do you use?</legend>
+          <div class="opts">
+            <label class="opt"><input type="radio" name="calendar" value="Google"><span>Google</span></label>
+            <label class="opt"><input type="radio" name="calendar" value="Outlook"><span>Outlook</span></label>
+            <label class="opt"><input type="radio" name="calendar" value="Apple"><span>Apple</span></label>
+            <label class="opt"><input type="radio" name="calendar" value="Something else"><span>Something else</span></label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Which Mac do you have?</legend>
+          <div class="opts">
+            <label class="opt"><input type="radio" name="mac" value="MacBook with a notch"><span>MacBook with a notch</span></label>
+            <label class="opt"><input type="radio" name="mac" value="Mac without a notch"><span>Mac without a notch</span></label>
+            <label class="opt"><input type="radio" name="mac" value="No Mac yet"><span>No Mac yet</span></label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>How should Friday sound?</legend>
+          <div class="opts">
+            <label class="opt"><input type="radio" name="voice" value="Warm and calm"><span>Warm and calm</span></label>
+            <label class="opt"><input type="radio" name="voice" value="Upbeat"><span>Upbeat</span></label>
+            <label class="opt"><input type="radio" name="voice" value="Straight to the point"><span>Straight to the point</span></label>
+            <label class="opt"><input type="radio" name="voice" value="Surprise me"><span>Surprise me</span></label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>When would you want her running?</legend>
+          <div class="opts">
+            <label class="opt"><input type="radio" name="timing" value="This week"><span>This week</span></label>
+            <label class="opt"><input type="radio" name="timing" value="This month"><span>This month</span></label>
+            <label class="opt"><input type="radio" name="timing" value="Just exploring"><span>Just exploring</span></label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>How did you hear about Friday?</legend>
+          <div class="opts">
+            <label class="opt"><input type="radio" name="heard" value="Instagram"><span>Instagram</span></label>
+            <label class="opt"><input type="radio" name="heard" value="A friend"><span>A friend</span></label>
+            <label class="opt"><input type="radio" name="heard" value="Somewhere else"><span>Somewhere else</span></label>
+          </div>
+        </fieldset>
+        <div class="field">
+          <label for="extra">Anything else we should know?</label>
+          <textarea id="extra" name="extra" rows="2"></textarea>
+        </div>
+        <div class="brief-actions">
+          <button class="btn" type="submit">Send my answers</button>
+          <button class="linkish" type="button" id="brief-skip">Skip for now</button>
+        </div>
+        <p class="msg" id="brief-msg" role="status" aria-live="polite"></p>
+      </form>
+
+      <div class="done" id="done" hidden tabindex="-1">
+        <h3>All set.</h3>
+        <p>Your invite is in your inbox. See you on the call.</p>
+      </div>
     </section>
   </main>
 
   <footer class="foot">
-    <span>Friday · Made in Ontario</span>
+    <span>Friday · Made by Cortex, on a Friday</span>
     <span class="foot-links"><a href="privacy.html">Privacy Policy</a><a href="terms.html">Terms</a><a href="#top">Back to top</a></span>
   </footer>
 

@@ -1,0 +1,11 @@
+
+# demo recordings + build output (large, regenerable)
+demo/takes/
+demo/clips/
+demo/out/
+demo/*.log
+demo/*.out
+demo/notch/FridayNotch.app/
+demo/notch/*.log
+demo/vault/deadlines.json
+.DS_Store

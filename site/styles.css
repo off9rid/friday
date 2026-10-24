@@ -308,3 +308,65 @@ html.cur-label #cur-dot { opacity: 0; }
 .founder-card { max-width: 860px; margin: 0 auto; padding: var(--s8) clamp(var(--s5), 5vw, var(--s8)); border: 1px solid var(--line); border-left: 3px solid var(--accent); border-radius: var(--r3); background: rgba(18,16,22,.86); backdrop-filter: blur(8px); }
 .founder blockquote { margin: var(--s5) 0 0; font: 400 clamp(26px, 3.2vw, 40px)/1.2 var(--font-display); color: var(--ink); }
 .sig { margin-top: var(--s5); font: 400 13px var(--font-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+
+/* booking flow: details -> Calendly -> brief */
+.stepbar { display: flex; justify-content: center; gap: var(--s5); margin: var(--s6) 0 0; padding: 0; list-style: none; font-size: 14px; color: var(--muted); }
+.stepbar li { display: flex; align-items: center; gap: var(--s2); }
+.stepbar span { display: grid; place-items: center; width: 26px; height: 26px; border: 1px solid var(--line); border-radius: 50%; font: 500 12px var(--font-mono); }
+.stepbar li.on { color: var(--ink); }
+.stepbar li.on span { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.stepbar li.past span { border-color: var(--accent); color: var(--accent); }
+@media (max-width: 520px) { .stepbar { gap: var(--s3); font-size: 13px; } }
+#join-form { margin-top: var(--s5); }
+.hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+.cal-step { width: 100%; max-width: 920px; margin: var(--s5) auto 0; }
+.cal-embed { height: 820px; border: 1px solid var(--line); border-radius: var(--r3); overflow: hidden; background: #121016; }
+.cal-embed iframe { display: block; }
+.cal-loading { padding: var(--s9) var(--s4); color: #555; }
+.linkish { margin-top: var(--s4); padding: var(--s2); border: 0; background: none; color: var(--muted); font: 400 14px var(--font-text); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.linkish:hover { color: var(--ink); }
+form.brief { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--s5); max-width: 760px; margin-top: var(--s5); padding: var(--s6); }
+.brief-head { display: grid; gap: var(--s2); }
+.brief-head h3 { font: 400 clamp(30px, 4vw, 44px)/1.05 var(--font-display); }
+.brief-head p:last-child { color: var(--muted); }
+.brief fieldset { margin: 0; padding: 0; border: 0; display: grid; gap: var(--s2); }
+.brief legend { padding: 0 0 var(--s2); font-size: 15px; color: var(--ink); }
+.brief legend small { margin-left: var(--s2); color: var(--muted); font-size: 13px; }
+.brief .field label { font-size: 15px; color: var(--ink); }
+.opts { display: flex; flex-wrap: wrap; gap: var(--s2); }
+.opt { position: relative; }
+.opt input { position: absolute; opacity: 0; width: 1px; height: 1px; min-height: 0; }
+.opt span { display: inline-flex; align-items: center; min-height: 44px; padding: 0 var(--s4); border: 1px solid var(--line); border-radius: 999px; color: var(--ink); font-size: 14px; cursor: pointer; transition: border-color .2s var(--ease-out), background .2s var(--ease-out); }
+.opt span:hover { border-color: var(--accent); }
+.opt input:checked + span { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.opt input:focus-visible + span { outline: 2px solid var(--focus); outline-offset: 3px; }
+textarea { padding: var(--s3) var(--s4); border: 1px solid var(--line); border-radius: var(--r2); background: var(--ground); color: var(--ink); font: 400 16px/1.5 var(--font-text); resize: vertical; }
+textarea:focus { border-color: var(--accent); outline: none; }
+textarea::placeholder { color: #6f685f; }
+.brief-actions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s4); }
+.brief-actions .linkish { margin: 0; }
+.done { max-width: 560px; margin: var(--s6) auto 0; padding: var(--s6); border: 1px solid var(--line); border-radius: var(--r3); background: rgba(14,11,14,.8); display: grid; gap: var(--s2); }
+.done h3 { font: 400 44px/1 var(--font-display); color: var(--accent); }
+.done p { color: var(--muted); }
+@media (max-width: 760px) { form.brief { padding: var(--s5); } .cal-embed { height: 1000px; } }
+[hidden] { display: none !important; }
+#join-form, .cal-step, form.brief, .done { scroll-margin-top: 96px; }
+
+/* real screen recording */
+.watch { max-width: 1240px; margin: 0 auto; padding: var(--s10) var(--pad) var(--s8); text-align: center; }
+.watch .notch-head h2 { margin-top: var(--s4); }
+.film { position: relative; width: min(1080px, 100%); aspect-ratio: 1920 / 1060; margin: var(--s7) auto 0; border: 1px solid #3a3340; border-radius: var(--r3); overflow: hidden; background: #000; box-shadow: 0 40px 120px -40px rgba(255,140,40,.35); }
+.film video { display: block; width: 100%; height: 100%; object-fit: cover; }
+.film-sound { position: absolute; right: var(--s4); bottom: var(--s4); display: inline-flex; align-items: center; gap: var(--s2); min-height: 44px; padding: 0 var(--s4); border: 1px solid rgba(255,181,71,.45); border-radius: 999px; background: rgba(7,6,10,.72); backdrop-filter: blur(8px); color: var(--ink); font: 500 14px var(--font-text); cursor: pointer; transition: background .2s var(--ease-out), border-color .2s var(--ease-out); }
+.film-sound:hover { border-color: var(--accent); background: rgba(18,16,22,.9); }
+.film-sound svg { width: 18px; height: 18px; fill: currentColor; }
+.film-sound[aria-pressed="false"] .wave { opacity: .35; }
+.film-sound[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.film-cap { max-width: 44em; margin: var(--s4) auto 0; font-size: 14px; color: var(--muted); }
+.fine a { color: var(--accent); }
+@media (max-width: 700px) { .film-sound { right: var(--s3); bottom: var(--s3); min-height: 40px; font-size: 13px; } }
+.film-tabs { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--s2); margin-top: var(--s6); }
+.film-tabs .chip[aria-selected="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.film-tabs + .film { margin-top: var(--s5); }
+/* the scroll hint sits on the hero's small print when the window is short (laptops), so it goes there */
+@media (max-height: 860px) { .scroll-hint { display: none; } }

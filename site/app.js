@@ -1,7 +1,7 @@
-// Where demo requests go. Best: paste a Formspree endpoint (https://formspree.io/f/xxxx) so they land in your inbox.
-// Backup: put your business email in CONTACT_EMAIL and the form opens a ready-to-send email instead.
-const FORM_ENDPOINT = "";
-const CONTACT_EMAIL = "";
+// Demo bookings: step 1 details -> step 2 Calendly inline (prefilled) -> step 3 optional brief.
+// Every step is posted to LEADS_URL, a Google Apps Script web app that writes to your Google Sheet (tools/leads.gs).
+const BOOKING_URL = "https://calendly.com/amirali-zhn9/30min";
+const LEADS_URL = "https://script.google.com/macros/s/AKfycbyil3bWPPMxoDDt8PjiqVYq9P1BYa2cjxMHZ-RlbQCYug9XlaCgJhaa16b-sMPBgxGx/exec";
 
 // Shared state read by the 3D scene (scene.js).
 const F = (window.FRIDAY = { amp: 0, stage: 0, x: 0, dim: 1 });
@@ -11,7 +11,7 @@ const LINES = {
   "intro": "Good evening. I'm Friday. I know your notes, your schedule and how you like to work, and I'm ready when you are.",
   "today": "You have a meeting at ten, your report is due at five, and a test on Thursday. I'd start the report now, while you're fresh.",
   "focus": "Done. Focus music is on, notifications are off, and I'll check in at the top of the hour.",
-  "promise": "Last week you told Sarah you'd send the revised numbers by Friday. That's tomorrow. Shall I draft it?"
+  "promise": "Last week you told Sarah you'd send the revised numbers by Friday. That's tomorrow. Want me to draft it?"
 };
 
 // ---------- audio: real voice clips + a synthesized wake chime, analysed for the visuals
@@ -162,10 +162,67 @@ document.querySelectorAll("[data-plan]").forEach((a) => a.addEventListener("clic
   if (sel) sel.value = a.dataset.plan;
 }));
 
-// ---------- signup form
+// ---------- booking flow
 const form = document.getElementById("join-form");
 const msg = document.getElementById("form-msg");
-form?.addEventListener("submit", async (e) => {
+const calStep = document.getElementById("cal-step");
+const brief = document.getElementById("brief-form");
+const done = document.getElementById("done");
+let lead = null;
+
+function save(data) {
+  if (!LEADS_URL) { console.warn("LEADS_URL not set, not saved:", data); return Promise.resolve(); }
+  // text/plain + no-cors keeps it a simple request, which Apps Script accepts without a preflight
+  return fetch(LEADS_URL, { method: "POST", mode: "no-cors", body: JSON.stringify({ ...data, at: new Date().toISOString() }) }).catch(() => {});
+}
+function step(n) {
+  document.querySelectorAll(".stepbar li").forEach((li) => {
+    const k = +li.dataset.step;
+    li.classList.toggle("on", k === n);
+    li.classList.toggle("past", k < n);
+  });
+  form.hidden = n !== 1;
+  calStep.hidden = n !== 2;
+  brief.hidden = n !== 3;
+  done.hidden = n !== 4;
+  const show = [form, calStep, brief, done][n - 1];
+  show.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+}
+
+let calLoaded;
+function loadCalendly() {
+  return (calLoaded ||= new Promise((ok, fail) => {
+    const sc = document.createElement("script");
+    sc.src = "https://assets.calendly.com/assets/external/widget.js";
+    sc.async = true;
+    sc.onload = ok;
+    sc.onerror = fail;
+    document.head.appendChild(sc);
+  }));
+}
+async function showCalendar() {
+  step(2);
+  const box = document.getElementById("cal-embed");
+  try {
+    await loadCalendly();
+    box.innerHTML = "";
+    window.Calendly.initInlineWidget({
+      url: `${BOOKING_URL}?hide_gdpr_banner=1&background_color=121016&text_color=f4efe4&primary_color=ffb547`,
+      parentElement: box,
+      prefill: { name: lead.name, email: lead.email, customAnswers: { a1: `Plan: ${lead.plan}` } },
+    });
+  } catch {
+    box.innerHTML = `<p class="cal-loading">The calendar didn't load. <a href="${BOOKING_URL}" target="_blank" rel="noopener">Open it in a new tab</a>.</p>`;
+  }
+}
+addEventListener("message", (e) => {
+  if (e.origin !== "https://calendly.com" || e.data?.event !== "calendly.event_scheduled" || !lead) return;
+  save({ type: "booked", email: lead.email, name: lead.name, eventUri: e.data.payload?.event?.uri || "" });
+  step(3);
+});
+document.getElementById("cal-back")?.addEventListener("click", () => step(1));
+
+form?.addEventListener("submit", (e) => {
   e.preventDefault();
   const name = form.name.value.trim();
   const email = form.email.value.trim();
@@ -186,34 +243,55 @@ form?.addEventListener("submit", async (e) => {
     (!name ? form.name : form.email).focus();
     return;
   }
-  const btn = form.querySelector("button");
-  btn.disabled = true;
-  btn.textContent = "Sending…";
-  const payload = { name, email, plan: form.plan.value, agreedToTermsAndPrivacy: true, agreedAt: new Date().toISOString() };
-  try {
-    if (FORM_ENDPOINT) {
-      const r = await fetch(FORM_ENDPOINT, { method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json" }, body: JSON.stringify(payload) });
-      if (!r.ok) throw new Error("send failed");
-    } else if (CONTACT_EMAIL) {
-      const body = `Hi, I'd like a free Friday demo.%0D%0A%0D%0AName: ${encodeURIComponent(name)}%0D%0AEmail: ${encodeURIComponent(email)}%0D%0APlan: ${encodeURIComponent(payload.plan)}%0D%0AI agree to the Terms and Privacy Policy.`;
-      location.href = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent("Friday demo request")}&body=${body}`;
-    } else {
-      const list = JSON.parse(localStorage.getItem("friday-signups") || "[]");
-      list.push({ ...payload, at: new Date().toISOString() });
-      localStorage.setItem("friday-signups", JSON.stringify(list));
-    }
-    form.reset();
-    msg.className = "msg ok";
-    msg.textContent = `You're on the list, ${name.split(" ")[0]}. We'll email you within a day to book your demo.`;
-  } catch {
-    msg.className = "msg err";
-    msg.textContent = "Something went wrong. Please try again.";
-  } finally {
-    btn.disabled = false;
-    btn.textContent = "Request access";
-  }
+  msg.textContent = "";
+  lead = { name, email, plan: form.plan.value };
+  // bots fill the hidden field; let them through the UI but don't save them
+  if (!form.website.value) save({ type: "details", ...lead, agreedToTermsAndPrivacy: true });
+  showCalendar();
 });
 
+brief?.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const fd = new FormData(brief);
+  const answers = {};
+  for (const k of ["role", "onething", "calendar", "mac", "voice", "timing", "heard", "extra"]) answers[k] = (fd.get(k) || "").toString().trim();
+  for (const k of ["pains", "notes"]) answers[k] = fd.getAll(k).join(", ");
+  const btn = brief.querySelector("button[type=submit]");
+  btn.disabled = true;
+  btn.textContent = "Sending…";
+  await save({ type: "brief", email: lead?.email || "", name: lead?.name || "", ...answers });
+  btn.disabled = false;
+  btn.textContent = "Send my answers";
+  done.querySelector("p").textContent = "Thanks. Your invite is in your inbox, and your Friday will be set up around your answers before the call.";
+  step(4);
+});
+document.getElementById("brief-skip")?.addEventListener("click", () => step(4));
+
+
+// ---------- real screen recordings: play muted while on screen, "Sound on" restarts with her voice, tabs switch clips
+(() => {
+  const v = document.getElementById("film"), b = document.getElementById("film-sound");
+  if (!v || !b) return;
+  const label = b.querySelector("span"), lede = document.getElementById("film-lede");
+  let seen = false;
+  if (reduce) v.controls = true;
+  else new IntersectionObserver(([e]) => { seen = e.isIntersecting; if (seen) v.play().catch(() => {}); else v.pause(); }, { threshold: 0.5 }).observe(v);
+  b.addEventListener("click", () => {
+    const on = v.muted;
+    v.muted = !on;
+    if (on) { v.currentTime = 0; v.play().catch(() => {}); }
+    b.setAttribute("aria-pressed", String(on));
+    label.textContent = on ? "Sound off" : "Sound on";
+  });
+  const tabs = document.querySelectorAll(".film-tabs [data-clip]");
+  tabs.forEach((t) => t.addEventListener("click", () => {
+    tabs.forEach((x) => x.setAttribute("aria-selected", String(x === t)));
+    lede.textContent = t.dataset.lede;
+    v.src = `video/friday-${t.dataset.clip}.mp4`;
+    v.poster = `video/friday-${t.dataset.clip}.jpg`;
+    if (!reduce) v.play().catch(() => {});
+  }));
+})();
 
 // ---------- notch demo: a looping scripted animation, starts when scrolled into view
 (() => {
@@ -298,7 +376,7 @@ form?.addEventListener("submit", async (e) => {
   const LINK = "a, button, summary, label, select, .chip, [role='button']";
   addEventListener("pointerover", (e) => {
     const t = e.target.closest ? e.target : e.target.parentElement;
-    const field = t.closest("input, textarea, select");
+    const field = t.closest("input, textarea, select, iframe, .cal-embed");
     root.classList.toggle("native-cursor", !!field);
     const link = t.closest(LINK) && !field;
     const lab = t.closest("[data-say]");
