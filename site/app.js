@@ -6,10 +6,10 @@ const F = (window.FRIDAY = { amp: 0, stage: 0, x: 0, dim: 1 });
 const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 const LINES = {
-  intro: "Good evening. I'm Friday. I've read your notes, I know your week, and I'm ready when you are.",
-  today: "You have a client call at ten, the proposal is due at five, and it'll rain after lunch. I'd start the proposal now, while you're fresh.",
-  focus: "Done. Focus music is on, notifications are off, and I'll check in at the top of the hour.",
-  promise: "Last Tuesday you told Sarah you'd send the revised pricing by Friday. That's tomorrow. Shall I draft it?",
+  "intro": "Good evening. I'm Friday. I know your notes, your schedule and how you like to work, and I'm ready when you are.",
+  "today": "You have a meeting at ten, your report is due at five, and a test on Thursday. I'd start the report now, while you're fresh.",
+  "focus": "Done. Focus music is on, notifications are off, and I'll check in at the top of the hour.",
+  "promise": "Last week you told Sarah you'd send the revised numbers by Friday. That's tomorrow. Shall I draft it?"
 };
 
 // ---------- audio: real voice clips + a synthesized wake chime, analysed for the visuals
@@ -207,3 +207,45 @@ if (qy) { document.documentElement.style.scrollBehavior = "auto"; scrollTo(0, +q
 // QA helper: ?stage=2 freezes the 3D scene on one shape.
 const qs = new URLSearchParams(location.search).get("stage");
 if (qs !== null) { F.qa = true; stageFromScroll = () => { F.stage = +qs; F.x = 2.7; F.dim = 1; }; }
+
+// ---------- notch demo: a looping scripted animation, starts when scrolled into view
+(() => {
+  const mac = document.getElementById("mac");
+  if (!mac) return;
+  const shape = document.getElementById("nshape"), cur = document.getElementById("cursor"), key = document.getElementById("keycap");
+  const nq = document.getElementById("nq"), na = document.getElementById("na"), nstat = document.getElementById("nstat"), cap = document.getElementById("ncap");
+  const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+  let running = false, alive = true;
+  const type = async (el, text, per) => { el.textContent = ""; for (const ch of text) { if (!alive) return; el.textContent += ch; await wait(per); } };
+  const setW = () => mac.style.setProperty("--mw", mac.clientWidth + "px");
+  setW(); addEventListener("resize", setW);
+  const still = reduce;
+  async function round(question, answer, how) {
+    nstat.textContent = "LISTENING"; nq.textContent = ""; na.textContent = "";
+    shape.classList.add("open"); shape.classList.remove("speaking");
+    await wait(700);
+    await type(nq, "“" + question + "”", 38);
+    nstat.textContent = "THINKING"; await wait(700);
+    nstat.textContent = "SPEAKING"; shape.classList.add("speaking");
+    await type(na, answer, 28);
+    await wait(2600);
+    shape.classList.remove("open", "speaking");
+    await wait(700);
+  }
+  async function loop() {
+    while (alive) {
+      cap.textContent = "Move to the notch";
+      cur.classList.remove("at-notch"); key.classList.remove("show", "down");
+      await wait(900); cur.classList.add("at-notch"); await wait(1500);
+      cap.textContent = "…and just talk";
+      await round("What's on my plate today?", "Meeting at ten, report due at five. Start the report now.");
+      cur.classList.remove("at-notch"); await wait(900);
+      cap.textContent = "Or hold Option, anywhere";
+      key.classList.add("show"); await wait(900); key.classList.add("down"); await wait(400);
+      await round("Remind me to send the invoice Friday.", "Done. Reminder set for Friday at nine.");
+      key.classList.remove("down"); await wait(500); key.classList.remove("show"); await wait(900);
+    }
+  }
+  if (still) { cap.textContent = "Hover the notch, or hold Option"; shape.classList.add("open"); nstat.textContent = "SPEAKING"; nq.textContent = "“What's on my plate today?”"; na.textContent = "Meeting at ten, report due at five. Start the report now."; return; }
+  new IntersectionObserver((es) => { if (es[0].isIntersecting && !running) { running = true; loop(); } }, { threshold: 0.4 }).observe(mac);
+})();

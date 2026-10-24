@@ -14,8 +14,8 @@ await send("Emulation.setDeviceMetricsOverride", { width: +W, height: +H, device
 await send("Page.navigate", { url });
 await sleep(3500);
 for (const y of ys) {
-  await send("Runtime.evaluate", { expression: `document.documentElement.style.scrollBehavior='auto';scrollTo(0,${y})` });
-  await sleep(1800);
+  await send("Runtime.evaluate", { expression: String(y).startsWith('#') ? `document.documentElement.style.scrollBehavior='auto';document.querySelector('${y}').scrollIntoView({block:'center'})` : `document.documentElement.style.scrollBehavior='auto';scrollTo(0,${y})` });
+  await sleep(+(process.env.DELAY||1800));
   const r = await send("Page.captureScreenshot", { format: "png" });
   writeFileSync(`${prefix}-${y}.png`, Buffer.from(r.data, "base64"));
 }
