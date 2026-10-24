@@ -1,5 +1,7 @@
-// Where signups go. Paste a Formspree endpoint here (https://formspree.io/f/xxxx) to receive them by email.
+// Where demo requests go. Best: paste a Formspree endpoint (https://formspree.io/f/xxxx) so they land in your inbox.
+// Backup: put your business email in CONTACT_EMAIL and the form opens a ready-to-send email instead.
 const FORM_ENDPOINT = "";
+const CONTACT_EMAIL = "";
 
 // Shared state read by the 3D scene (scene.js).
 const F = (window.FRIDAY = { amp: 0, stage: 0, x: 0, dim: 1 });
@@ -192,6 +194,9 @@ form?.addEventListener("submit", async (e) => {
     if (FORM_ENDPOINT) {
       const r = await fetch(FORM_ENDPOINT, { method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json" }, body: JSON.stringify(payload) });
       if (!r.ok) throw new Error("send failed");
+    } else if (CONTACT_EMAIL) {
+      const body = `Hi, I'd like a free Friday demo.%0D%0A%0D%0AName: ${encodeURIComponent(name)}%0D%0AEmail: ${encodeURIComponent(email)}%0D%0APlan: ${encodeURIComponent(payload.plan)}%0D%0AI agree to the Terms and Privacy Policy.`;
+      location.href = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent("Friday demo request")}&body=${body}`;
     } else {
       const list = JSON.parse(localStorage.getItem("friday-signups") || "[]");
       list.push({ ...payload, at: new Date().toISOString() });
@@ -199,7 +204,7 @@ form?.addEventListener("submit", async (e) => {
     }
     form.reset();
     msg.className = "msg ok";
-    msg.textContent = `You're on the list, ${name.split(" ")[0]}. We'll be in touch within a day.`;
+    msg.textContent = `You're on the list, ${name.split(" ")[0]}. We'll email you within a day to book your demo.`;
   } catch {
     msg.className = "msg err";
     msg.textContent = "Something went wrong. Please try again.";
@@ -209,12 +214,6 @@ form?.addEventListener("submit", async (e) => {
   }
 });
 
-// QA helper: ?y=1200 jumps to a scroll position (used for screenshots).
-const qy = new URLSearchParams(location.search).get("y");
-if (qy) { document.documentElement.style.scrollBehavior = "auto"; scrollTo(0, +qy); }
-// QA helper: ?stage=2 freezes the 3D scene on one shape.
-const qs = new URLSearchParams(location.search).get("stage");
-if (qs !== null) { F.qa = true; stageFromScroll = () => { F.stage = +qs; F.x = 2.7; F.dim = 1; }; }
 
 // ---------- notch demo: a looping scripted animation, starts when scrolled into view
 (() => {

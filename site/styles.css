@@ -300,3 +300,11 @@ html.native-cursor #cur-dot, html.native-cursor #cur-ring { opacity: 0; }
 html.cur-link #cur-dot, html.cur-label #cur-dot { width: 4px; height: 4px; margin: -2px 0 0 -2px; }
 html.cur-label #cur-dot { opacity: 0; }
 @media (pointer: coarse) { #cur-dot, #cur-ring { display: none; } }
+
+/* founding offer + founder note */
+.founding { margin-top: var(--s5); display: inline-flex; align-items: center; gap: var(--s2); padding: var(--s2) var(--s4); border: 1px solid rgba(255,181,71,.45); border-radius: 999px; font-size: 14px; color: var(--ink); background: rgba(255,181,71,.07); }
+.founding b { color: var(--accent); font-weight: 600; }
+.center-f { display: flex; width: fit-content; }
+.founder-card { max-width: 860px; margin: 0 auto; padding: var(--s8) clamp(var(--s5), 5vw, var(--s8)); border: 1px solid var(--line); border-left: 3px solid var(--accent); border-radius: var(--r3); background: rgba(18,16,22,.86); backdrop-filter: blur(8px); }
+.founder blockquote { margin: var(--s5) 0 0; font: 400 clamp(26px, 3.2vw, 40px)/1.2 var(--font-display); color: var(--ink); }
+.sig { margin-top: var(--s5); font: 400 13px var(--font-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
