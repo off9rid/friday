@@ -1,0 +1,26 @@
+<!doctype html><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist+Mono&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#07060a;color:#f4efe4;display:grid;grid-template-columns:1fr 1fr;gap:0;font-family:"Geist Mono",monospace}
+.c{height:450px;display:grid;place-items:center;position:relative}
+.c small{position:absolute;left:20px;bottom:14px;font-size:11px;letter-spacing:.14em;color:#8a8275}
+.lock{display:flex;align-items:center;gap:22px}
+.lock svg{width:112px;height:112px}
+.word{font:400 92px/1 "Instrument Serif",serif;letter-spacing:-.02em}
+.light{background:#f4efe4;color:#16110a}
+.icon{width:230px;height:230px;border-radius:52px;background:radial-gradient(120% 120% at 30% 20%,#1b1510,#07060a 70%);display:grid;place-items:center;box-shadow:0 30px 80px -20px rgba(255,160,50,.45),inset 0 0 0 1px #2a2530}
+.icon svg{width:158px;height:158px}
+.mono svg{width:160px;height:160px}
+.mono path{fill:#16110a}.mono circle{fill:none;stroke:#16110a;stroke-width:2.2}
+</style>
+<div class="c"><div class="lock"><div id="m1"></div><span class="word">Friday</span></div><small>PRIMARY LOCKUP</small></div>
+<div class="c"><div class="icon" id="m2"></div><small>APP ICON</small></div>
+<div class="c light"><div class="lock"><div id="m3"></div><span class="word" style="color:#16110a">Friday</span></div><small style="color:#6b6354">ON LIGHT</small></div>
+<div class="c"><div style="width:48px;height:48px" id="m4"></div><small>FAVICON 48</small></div>
+<script>
+fetch("mark.svg").then(r=>r.text()).then(t=>{
+  for(const i of [1,2,3,4]){const d=document.getElementById("m"+i);d.innerHTML=t.replace(/id="(g|r|o)"/g,`id="$1${i}"`).replace(/url\(#(g|r|o)\)/g,`url(#$1${i})`);}
+  document.querySelector("#m4 svg").style.cssText="width:48px;height:48px";
+  document.documentElement.dataset.ready=1;
+});
+</script>
