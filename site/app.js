@@ -1,50 +1,192 @@
 // Where signups go. Paste a Formspree endpoint here (https://formspree.io/f/xxxx) to receive them by email.
 const FORM_ENDPOINT = "";
 
-// Replay the hero conversation once so it feels live. Content is visible without JS.
-const chat = document.getElementById("chat");
-if (chat && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
-  const items = [...chat.children];
-  items.forEach((li, i) => { li.style.animationDelay = `${0.3 + i * 0.9}s`; });
-  chat.classList.add("typing");
+// Shared state read by the 3D scene (scene.js).
+const F = (window.FRIDAY = { amp: 0, stage: 0, x: 0, dim: 1 });
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+const LINES = {
+  intro: "Good evening. I'm Friday. I've read your notes, I know your week, and I'm ready when you are.",
+  today: "You have a client call at ten, the proposal is due at five, and it'll rain after lunch. I'd start the proposal now, while you're fresh.",
+  focus: "Done. Focus music is on, notifications are off, and I'll check in at the top of the hour.",
+  promise: "Last Tuesday you told Sarah you'd send the revised pricing by Friday. That's tomorrow. Shall I draft it?",
+};
+
+// ---------- audio: real voice clips + a synthesized wake chime, analysed for the visuals
+let ctx, analyser, data, current;
+const buffers = {};
+function audio() {
+  if (ctx) return ctx;
+  ctx = new (window.AudioContext || window.webkitAudioContext)();
+  analyser = ctx.createAnalyser();
+  analyser.fftSize = 256;
+  analyser.smoothingTimeConstant = 0.7;
+  analyser.connect(ctx.destination);
+  data = new Uint8Array(analyser.frequencyBinCount);
+  return ctx;
+}
+async function load(key) {
+  if (!buffers[key]) {
+    const r = await fetch(`audio/${key}.mp3`);
+    buffers[key] = await ctx.decodeAudioData(await r.arrayBuffer());
+  }
+  return buffers[key];
+}
+function chime(at) {
+  // Two soft rising tones and an airy shimmer: Friday waking up.
+  [[523.25, 0], [783.99, 0.09]].forEach(([f, d]) => {
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = "sine";
+    o.frequency.setValueAtTime(f * 0.94, at + d);
+    o.frequency.exponentialRampToValueAtTime(f, at + d + 0.12);
+    g.gain.setValueAtTime(0, at + d);
+    g.gain.linearRampToValueAtTime(0.16, at + d + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.001, at + d + 0.7);
+    o.connect(g).connect(analyser);
+    o.start(at + d); o.stop(at + d + 0.75);
+  });
+  const n = ctx.createBufferSource(), b = ctx.createBuffer(1, ctx.sampleRate * 0.5, ctx.sampleRate), ch = b.getChannelData(0);
+  for (let i = 0; i < ch.length; i++) ch[i] = (Math.random() * 2 - 1) * (1 - i / ch.length) ** 3;
+  const hp = ctx.createBiquadFilter(); hp.type = "highpass"; hp.frequency.value = 6000;
+  const g = ctx.createGain(); g.gain.value = 0.05;
+  n.buffer = b; n.connect(hp).connect(g).connect(analyser); n.start(at);
 }
 
-const t = document.getElementById("hud-time");
-if (t) t.textContent = new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+const qEl = document.getElementById("q"), aEl = document.getElementById("a"), statusEl = document.getElementById("status");
+let wordTimer;
+async function say(key, question, btn) {
+  audio();
+  if (ctx.state === "suspended") await ctx.resume();
+  if (current) { try { current.stop(); } catch {} }
+  clearInterval(wordTimer);
+  document.querySelectorAll("[data-say]").forEach((b) => { b.classList.remove("playing"); b.removeAttribute("aria-pressed"); });
+  btn?.classList.add("playing");
+  if (btn?.classList.contains("chip")) btn.setAttribute("aria-pressed", "true");
+  if (qEl) qEl.textContent = `“${question}”`;
+  if (statusEl) statusEl.textContent = "FRIDAY · THINKING";
+  const buf = await load(key);
+  const t0 = ctx.currentTime + 0.05;
+  chime(t0);
+  const src = ctx.createBufferSource();
+  src.buffer = buf; src.connect(analyser);
+  const start = t0 + 0.55;
+  src.start(start);
+  current = src;
+  // Reveal the transcript word by word in time with the voice.
+  if (aEl) {
+    const words = LINES[key].split(" ");
+    aEl.innerHTML = words.map((w) => `<span class="w">${w}</span>`).join(" ");
+    const spans = aEl.querySelectorAll(".w");
+    const per = (buf.duration * 1000) / words.length;
+    setTimeout(() => {
+      if (statusEl) statusEl.textContent = "FRIDAY · SPEAKING";
+      let i = 0;
+      wordTimer = setInterval(() => { spans[i++]?.classList.add("on"); if (i >= spans.length) clearInterval(wordTimer); }, per);
+    }, 550);
+  }
+  src.onended = () => {
+    if (current !== src) return;
+    btn?.classList.remove("playing");
+    if (statusEl) statusEl.textContent = "FRIDAY · READY";
+    current = null;
+  };
+}
+document.querySelectorAll("[data-say]").forEach((b) => b.addEventListener("click", () => say(b.dataset.say, b.dataset.q || "Who are you?", b)));
 
-// Plan buttons preselect the plan in the form.
-document.querySelectorAll("[data-plan]").forEach((a) => {
-  a.addEventListener("click", () => {
-    const sel = document.getElementById("plan");
-    if (sel) sel.value = a.dataset.plan === "Team" ? "Team" : a.dataset.plan;
+// ---------- per-frame: audio level, voice bars, scroll stage
+const bars = document.getElementById("bars");
+const N_BARS = 48;
+if (bars) bars.innerHTML = "<i></i>".repeat(N_BARS);
+const barEls = bars ? [...bars.children] : [];
+const consoleEl = document.querySelector(".console");
+const sections = [...document.querySelectorAll("[data-stage]")];
+const lab = document.querySelector(".lab");
+const nav = document.querySelector(".nav");
+const wide = () => innerWidth > 900;
+
+let stageFromScroll = function () {
+  // Each section's stage applies when its middle crosses the middle of the screen; blend between neighbours.
+  const mid = innerHeight / 2;
+  const pts = sections.map((s) => {
+    const r = s.getBoundingClientRect();
+    return { y: r.top + Math.min(r.height, innerHeight) / 2, st: +s.dataset.stage, x: +(s.dataset.x || 0), dim: +(s.dataset.dim || 1) };
   });
-});
+  let a = pts[0], b = pts[pts.length - 1];
+  for (let i = 0; i < pts.length - 1; i++) if (pts[i].y <= mid && pts[i + 1].y >= mid) { a = pts[i]; b = pts[i + 1]; break; }
+  if (mid < pts[0].y) b = a = pts[0];
+  if (mid > pts[pts.length - 1].y) a = b = pts[pts.length - 1];
+  const raw = a === b ? 0 : (mid - a.y) / (b.y - a.y);
+  const t = Math.min(1, Math.max(0, (raw - 0.3) / 0.4)); // hold each shape, morph in the middle of the gap
+  const s = t * t * (3 - 2 * t);
+  F.stage = a.st + (b.st - a.st) * s;
+  F.x = wide() ? a.x + (b.x - a.x) * s : 0;
+  F.dim = (a.dim + (b.dim - a.dim) * s) * (wide() ? 1 : 0.7);
+}
 
+function frame() {
+  let level = 0;
+  if (analyser) {
+    analyser.getByteFrequencyData(data);
+    let sum = 0;
+    for (let i = 2; i < 60; i++) sum += data[i];
+    level = sum / (58 * 255);
+    barEls.forEach((el, i) => {
+      const v = data[2 + Math.floor((i / N_BARS) * 70)] / 255;
+      el.style.height = `${6 + v * 94}%`;
+    });
+  } else {
+    const t = performance.now() / 1000;
+    barEls.forEach((el, i) => { el.style.height = `${8 + (Math.sin(t * 2 + i * 0.4) * 0.5 + 0.5) * 10}%`; });
+  }
+  F.amp += (Math.min(level * 2.2, 1) - F.amp) * 0.25;
+  consoleEl?.style.setProperty("--amp", F.amp.toFixed(3));
+  stageFromScroll();
+  if (lab) {
+    const r = lab.getBoundingClientRect();
+    const p = Math.min(1, Math.max(0, -r.top / (r.height - innerHeight) * 1.6));
+    lab.style.setProperty("--p", reduce ? 1 : p.toFixed(4));
+  }
+  nav?.classList.toggle("solid", scrollY > 40);
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+
+const clock = document.getElementById("clock");
+if (clock) clock.textContent = new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+
+// ---------- plan buttons preselect the plan
+document.querySelectorAll("[data-plan]").forEach((a) => a.addEventListener("click", () => {
+  const sel = document.getElementById("plan");
+  if (sel) sel.value = a.dataset.plan;
+}));
+
+// ---------- signup form
 const form = document.getElementById("join-form");
 const msg = document.getElementById("form-msg");
 form?.addEventListener("submit", async (e) => {
   e.preventDefault();
   const name = form.name.value.trim();
   const email = form.email.value.trim();
-  form.name.setAttribute("aria-invalid", String(!name));
   const okEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  form.name.setAttribute("aria-invalid", String(!name));
   form.email.setAttribute("aria-invalid", String(!okEmail));
   if (!name || !okEmail) {
     msg.className = "msg err";
     msg.textContent = !name ? "Please add your name." : "That email doesn't look right.";
+    (!name ? form.name : form.email).focus();
     return;
   }
   const btn = form.querySelector("button");
   btn.disabled = true;
   btn.textContent = "Sending…";
-  const data = { name, email, plan: form.plan.value };
+  const payload = { name, email, plan: form.plan.value };
   try {
     if (FORM_ENDPOINT) {
-      const r = await fetch(FORM_ENDPOINT, { method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json" }, body: JSON.stringify(data) });
+      const r = await fetch(FORM_ENDPOINT, { method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json" }, body: JSON.stringify(payload) });
       if (!r.ok) throw new Error("send failed");
     } else {
       const list = JSON.parse(localStorage.getItem("friday-signups") || "[]");
-      list.push({ ...data, at: new Date().toISOString() });
+      list.push({ ...payload, at: new Date().toISOString() });
       localStorage.setItem("friday-signups", JSON.stringify(list));
     }
     form.reset();
@@ -58,3 +200,10 @@ form?.addEventListener("submit", async (e) => {
     btn.textContent = "Request access";
   }
 });
+
+// QA helper: ?y=1200 jumps to a scroll position (used for screenshots).
+const qy = new URLSearchParams(location.search).get("y");
+if (qy) { document.documentElement.style.scrollBehavior = "auto"; scrollTo(0, +qy); }
+// QA helper: ?stage=2 freezes the 3D scene on one shape.
+const qs = new URLSearchParams(location.search).get("stage");
+if (qs !== null) { F.qa = true; stageFromScroll = () => { F.stage = +qs; F.x = 2.7; F.dim = 1; }; }

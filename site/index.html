@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Friday · Your own AI assistant, built on your notes</title>
-  <meta name="description" content="Friday is a personal AI assistant that lives on your Mac, knows your notes, and answers out loud. Set up for you in one call.">
-  <meta name="theme-color" content="#0c0b09">
+  <meta name="description" content="Friday is a personal AI assistant that lives on your Mac, knows your notes, and answers out loud. Hear her, then get yours set up in one call.">
+  <meta name="theme-color" content="#07060a">
   <meta property="og:title" content="Friday · Your own AI assistant">
   <meta property="og:description" content="A Jarvis-style assistant that knows your notes, runs your Mac, and talks back. Set up for you.">
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
@@ -13,9 +13,11 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;600&family=Geist+Mono:wght@400&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
+  <script type="importmap">{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js" } }</script>
 </head>
 <body>
   <a class="skip" href="#main">Skip to content</a>
+  <canvas id="scene" aria-hidden="true"></canvas>
 
   <header class="nav">
     <a class="brand" href="#top" aria-label="Friday home">
@@ -23,90 +25,115 @@
       Friday
     </a>
     <nav aria-label="Main">
-      <a href="#what">What it does</a>
+      <a href="#voice">What it does</a>
+      <a href="#demo">Hear her</a>
       <a href="#how">How it works</a>
       <a href="#pricing">Pricing</a>
-      <a href="#faq">FAQ</a>
     </nav>
     <a class="btn btn-sm" href="#join">Get Friday</a>
   </header>
 
   <main id="main">
-    <section class="hero" id="top">
+    <section class="hero" id="top" data-stage="0" data-x="2.7">
       <div class="hero-copy">
-        <p class="eyebrow">Personal AI assistant · for Mac</p>
+        <p class="eyebrow"><span class="dot" aria-hidden="true"></span>Personal AI assistant · for Mac</p>
         <h1>Make every day feel like <em>Friday.</em></h1>
-        <p class="lede">Friday is your own Jarvis. It reads your notes, remembers your deadlines, runs your Mac and answers out loud. We set it up for you in one call, so you never touch a line of code.</p>
+        <p class="lede">Your own Jarvis. Friday reads your notes, remembers every deadline, runs your Mac and talks back. We set it up for you in one call.</p>
         <div class="cta-row">
-          <a class="btn" href="#join">Get early access</a>
-          <a class="btn btn-ghost" href="#how">See how it works</a>
+          <button class="btn btn-voice" type="button" data-say="intro" data-q="Who are you?">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+            Hear Friday
+          </button>
+          <a class="btn btn-ghost" href="#join">Get early access</a>
         </div>
-        <p class="fine">Founding clients get setup at half price. Limited spots.</p>
+        <p class="fine">Sound on. That's her real voice, from the same engine your Friday uses.</p>
       </div>
+      <p class="scroll-hint" aria-hidden="true">Scroll</p>
+    </section>
 
-      <figure class="hud" aria-label="Example conversation with Friday">
-        <div class="hud-top">
+    <section class="lab" aria-label="The workshop" data-stage="0.6" data-x="0" data-dim="0.35">
+      <div class="lab-sticky">
+        <div class="lab-stage" aria-hidden="true">
+          <div class="ring r1"></div><div class="ring r2"></div><div class="ring r3"></div>
+          <div class="core"></div>
+          <div class="panel p1"><b>INBOX</b><span>3 need a reply</span><i style="--w:72%"></i></div>
+          <div class="panel p2"><b>CALENDAR</b><span>Client call · 10:00</span><span>Proposal due · 17:00</span></div>
+          <div class="panel p3"><b>VAULT</b><span>1,284 notes indexed</span><i style="--w:100%"></i></div>
+          <div class="panel p4"><b>WEATHER</b><span>Rain after 13:00</span></div>
+          <div class="panel p5"><b>FOCUS</b><span>50:00 · notifications off</span><i style="--w:38%"></i></div>
+          <div class="panel p6"><b>NOW PLAYING</b><span>Focus mix</span></div>
+        </div>
+        <div class="lab-copy">
+          <p class="kicker">The workshop</p>
+          <h2>Everything you're juggling, <em>in one place</em>, listening.</h2>
+        </div>
+      </div>
+    </section>
+
+    <section class="chapter" id="voice" data-stage="1" data-x="2.7">
+      <div class="chapter-copy">
+        <p class="kicker">01 · Voice</p>
+        <h2>Hold a key. <em>Talk.</em></h2>
+        <p>No typing, no tabs. Ask out loud and Friday answers in a natural voice in about two seconds, then does the thing: opens the app, plays the music, starts the focus timer.</p>
+      </div>
+    </section>
+
+    <section class="chapter" data-stage="2" data-x="2.7">
+      <div class="chapter-copy">
+        <p class="kicker">02 · Memory</p>
+        <h2>It has read <em>everything</em> you've written.</h2>
+        <p>Friday is built on your own Obsidian vault. Every note, plan and half-finished idea becomes something you can ask about, and the answer comes back in seconds, not as a list of search results.</p>
+      </div>
+    </section>
+
+    <section class="chapter" data-stage="3" data-x="2.7">
+      <div class="chapter-copy">
+        <p class="kicker">03 · Time</p>
+        <h2>Your week, <em>handled.</em></h2>
+        <p>A morning briefing before you leave the house. Deadlines logged the moment you mention them. A weekly review every Monday. Friday keeps the whole week in view so you don't have to.</p>
+      </div>
+    </section>
+
+    <section class="demo" id="demo" data-stage="4" data-x="0">
+      <div class="demo-head">
+        <p class="kicker">Live demo</p>
+        <h2>Don't take our word for it. <em>Ask her.</em></h2>
+      </div>
+      <div class="console" role="region" aria-label="Friday voice demo">
+        <div class="console-top">
           <span class="orb" aria-hidden="true"></span>
-          <span class="hud-status">FRIDAY · LISTENING</span>
-          <span class="hud-time" id="hud-time">9:04 PM</span>
+          <span class="status" id="status">FRIDAY · READY</span>
+          <span class="clock" id="clock">9:04 PM</span>
         </div>
-        <ol class="chat" id="chat">
-          <li class="you">"What's due this week?"</li>
-          <li class="fri">Your calculus test is Wednesday and the English essay is Friday. Want a study plan for tonight?</li>
-          <li class="you">"Yeah, and play something chill."</li>
-          <li class="fri">Plan's in your notes. Playing lo-fi. Focus mode is on until ten.</li>
-        </ol>
-        <div class="wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
-        <figcaption>Illustrative example of a real Friday session.</figcaption>
-      </figure>
-    </section>
-
-    <section class="strip" aria-label="Works with">
-      <span>Works with</span>
-      <b>Obsidian</b><b>macOS</b><b>Spotify</b><b>Calendar</b><b>Your voice</b>
-    </section>
-
-    <section class="section" id="what">
-      <h2>Not another chatbot. <em>Your</em> assistant.</h2>
-      <p class="section-lede">ChatGPT knows the internet. Friday knows you: your notes, your schedule, your goals and how you like things done.</p>
-      <div class="grid">
-        <article class="card">
-          <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/><circle cx="12" cy="12" r="3.5"/></svg>
-          <h3>Morning briefing</h3>
-          <p>Weather, schedule, deadlines and the one thing that matters today, read to you before you leave the house.</p>
-        </article>
-        <article class="card">
-          <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
-          <h3>Talk to it</h3>
-          <p>Hold a key and speak. Friday answers in a natural voice and acts: opens apps, plays music, starts focus mode.</p>
-        </article>
-        <article class="card">
-          <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h11a3 3 0 0 1 3 3v11H7a3 3 0 0 1-3-3z"/><path d="M8 9h6M8 13h6"/></svg>
-          <h3>Remembers everything</h3>
-          <p>Built on your own Obsidian vault. Ask about anything you've ever written down and get the answer, not a search result.</p>
-        </article>
-        <article class="card">
-          <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
-          <h3>Keeps you on track</h3>
-          <p>Deadlines added the moment you mention them, reminders that actually fire, and a weekly review waiting every Monday.</p>
-        </article>
+        <div class="screen">
+          <p class="q" id="q">Pick a question below. Sound on.</p>
+          <p class="a" id="a" aria-live="polite"></p>
+        </div>
+        <div class="bars" id="bars" aria-hidden="true"></div>
+        <div class="chips" role="group" aria-label="Questions to ask Friday">
+          <button type="button" class="chip" data-say="today" data-q="What's on today?">What's on today?</button>
+          <button type="button" class="chip" data-say="focus" data-q="Help me focus.">Help me focus.</button>
+          <button type="button" class="chip" data-say="promise" data-q="What did I promise Sarah?">What did I promise Sarah?</button>
+          <button type="button" class="chip" data-say="intro" data-q="Who are you?">Who are you?</button>
+        </div>
       </div>
+      <p class="fine center">Voice generated by Friday's speech engine. Answers come from a sample vault.</p>
     </section>
 
-    <section class="section how" id="how">
-      <h2>Live in a day. You do three things.</h2>
+    <section class="section" id="how" data-stage="4" data-x="0" data-dim="0.3">
+      <h2>Live in a day. You do <em>three</em> things.</h2>
       <ol class="steps">
-        <li>
+        <li class="tilt">
           <span class="num">01</span>
           <h3>Book a setup call</h3>
           <p>Thirty minutes. We learn how you work, what you want handled, and what Friday should sound like.</p>
         </li>
-        <li>
+        <li class="tilt">
           <span class="num">02</span>
           <h3>Answer ten questions</h3>
-          <p>A short questionnaire about your routine, goals and tools. Friday uses it to know you from day one.</p>
+          <p>A short questionnaire about your routine, goals and tools, so Friday knows you from day one.</p>
         </li>
-        <li>
+        <li class="tilt">
           <span class="num">03</span>
           <h3>Download and talk</h3>
           <p>Install the Mac app, connect your notes, and say hello. We stay on call for the first week.</p>
@@ -114,11 +141,11 @@
       </ol>
     </section>
 
-    <section class="section" id="pricing">
+    <section class="section" id="pricing" data-stage="4" data-x="0" data-dim="0.25">
       <h2>Simple pricing.</h2>
       <p class="section-lede">One setup fee, then a monthly plan. Cancel anytime.</p>
       <div class="plans">
-        <article class="plan">
+        <article class="plan tilt">
           <h3>Personal</h3>
           <p class="who">Students, creators, solo founders</p>
           <p class="price"><span>$29</span>/month</p>
@@ -132,7 +159,7 @@
           </ul>
           <a class="btn btn-ghost" href="#join" data-plan="Personal">Choose Personal</a>
         </article>
-        <article class="plan plan-hot">
+        <article class="plan plan-hot tilt">
           <p class="tag">Most popular</p>
           <h3>Pro</h3>
           <p class="who">Busy professionals and small business owners</p>
@@ -141,13 +168,13 @@
           <ul>
             <li>Everything in Personal</li>
             <li>Custom voice and personality</li>
-            <li>Custom routines built for your work</li>
+            <li>Routines built around your work</li>
             <li>Up to two Macs</li>
-            <li>Priority support and monthly tune-up</li>
+            <li>Priority support and a monthly tune-up</li>
           </ul>
           <a class="btn" href="#join" data-plan="Pro">Choose Pro</a>
         </article>
-        <article class="plan">
+        <article class="plan tilt">
           <h3>Team</h3>
           <p class="who">Companies and teams of 3 or more</p>
           <p class="price"><span>Custom</span></p>
@@ -161,17 +188,17 @@
           <a class="btn btn-ghost" href="#join" data-plan="Team">Talk to us</a>
         </article>
       </div>
-      <p class="fine center">Founding-client pricing shown. Prices in CAD.</p>
+      <p class="fine center">Founding-client pricing. Prices in CAD.</p>
     </section>
 
-    <section class="section privacy">
-      <div>
+    <section class="section privacy" data-stage="4" data-x="0" data-dim="0.25">
+      <div class="privacy-card tilt">
         <h2>Your notes stay on your Mac.</h2>
-        <p>Friday lives on your own computer. Your vault isn't uploaded or stored on our servers. Only the question you're asking is sent to the AI model to get an answer.</p>
+        <p>Friday lives on your own computer. Your vault isn't uploaded to or stored on our servers. Only the question you ask is sent to the AI model to get an answer.</p>
       </div>
     </section>
 
-    <section class="section" id="faq">
+    <section class="section" id="faq" data-stage="4" data-x="0" data-dim="0.25">
       <h2>Questions.</h2>
       <div class="faq">
         <details>
@@ -180,7 +207,7 @@
         </details>
         <details>
           <summary>What if I don't use Obsidian?</summary>
-          <p>We'll create a vault for you during setup and bring in what you have: notes, docs, your calendar.</p>
+          <p>We'll create a vault for you during setup and bring in what you already have: notes, docs and your calendar.</p>
         </details>
         <details>
           <summary>Does it work on Windows or my phone?</summary>
@@ -188,16 +215,16 @@
         </details>
         <details>
           <summary>How is this different from ChatGPT or Siri?</summary>
-          <p>They don't know your life. Friday is built on your own notes, deadlines and routines, and it takes actions on your Mac instead of just answering.</p>
+          <p>They don't know your life. Friday is built on your own notes, deadlines and routines, and it takes actions on your Mac instead of only answering.</p>
         </details>
         <details>
           <summary>Can I cancel?</summary>
-          <p>Anytime. The setup fee covers our time building yours; the monthly plan stops whenever you want.</p>
+          <p>Anytime. The setup fee covers building yours; the monthly plan stops whenever you want.</p>
         </details>
       </div>
     </section>
 
-    <section class="section join" id="join">
+    <section class="section join" id="join" data-stage="5" data-x="0" data-dim="0.6">
       <h2>Get your own <em>Friday.</em></h2>
       <p class="section-lede">Leave your email and we'll reach out within a day to book your setup call.</p>
       <form id="join-form" novalidate>
@@ -230,5 +257,6 @@
   </footer>
 
   <script src="app.js" defer></script>
+  <script type="module" src="scene.js"></script>
 </body>
 </html>
