@@ -9,3 +9,4 @@ demo/notch/FridayNotch.app/
 demo/notch/*.log
 demo/vault/deadlines.json
 .DS_Store
+teaser/
